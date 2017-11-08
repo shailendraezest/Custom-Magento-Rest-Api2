@@ -16,13 +16,19 @@
                 <privileges>
                     <guest>
                         <create>1</create>
+                        <retrieve>1</retrieve>
                     </guest>
+                    <admin>
+                         <create>1</create>
+                         <retrieve>1</retrieve>
+                         <delete>1</delete>
+                    </admin>
                 </privileges>
                 <attributes  translate="firstname lastname email password" module="Custom_Restapi">
-                    <firstname>First Name</firstname>
-                    <lastname>Last Name</lastname>
-                    <email>Email</email>
-                    <password>Password</password>
+                        <firstname>First Name</firstname>
+                        <lastname>Last Name</lastname>
+                        <email>Email</email>
+                        <password>Password</password>
                 </attributes>
                 <routes>
                     <route_entity>
