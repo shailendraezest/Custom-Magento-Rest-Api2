@@ -2,42 +2,29 @@
 /**
 * Example of simple product POST using Admin account via Magento REST API. OAuth authorization is used
 */
-$callbackUrl = "http://localhost/magento/restapi.php";
-$temporaryCredentialsRequestUrl = "http://localhost/magento/oauth/initiate?oauth_callback=" . urlencode($callbackUrl);
-$adminAuthorizationUrl = 'http://localhost/magento/admin/oauth_authorize';
-$accessTokenRequestUrl = 'http://localhost/magento/oauth/token';
-$apiUrl = 'http://localhost/magento/api/rest';
-$consumerKey = '750ad6ef03ac1b7715fae1745bc1e557';
-$consumerSecret = '1c16e64eac8988d20d060ac911a833c7';
+$apiUrl = 'http://localhost.abbott.de/api/rest';
+$consumerKey = 'd3966b78327c8b80e206368626480d04';
+$consumerSecret = '7959e561f38dd21648e4bab62a395da5';
+$token="dcca2bc8c5b2f2feefa745d1bfae2dd5";
+$secret="f91bccc12af4659c1cbaefbf09d12813";
 
-session_start();
-if (!isset($_GET['oauth_token']) && isset($_SESSION['state']) && $_SESSION['state'] == 1) {
-    $_SESSION['state'] = 0;
-}
+
 try {
-    $authType = ($_SESSION['state'] == 2) ? OAUTH_AUTH_TYPE_AUTHORIZATION : OAUTH_AUTH_TYPE_URI;
-    $oauthClient = new OAuth($consumerKey, $consumerSecret, OAUTH_SIG_METHOD_HMACSHA1, $authType);
+    //$oauthClient = new OAuth($consumerKey, $consumerSecret, OAUTH_SIG_METHOD_HMACSHA1, $authType);
+    $oauthClient = new OAuth($consumerKey, $consumerSecret);
     $oauthClient->enableDebug();
-
-    if (!isset($_GET['oauth_token']) && !$_SESSION['state']) {
-        $requestToken = $oauthClient->getRequestToken($temporaryCredentialsRequestUrl);
-        $_SESSION['secret'] = $requestToken['oauth_token_secret'];
-        $_SESSION['state'] = 1;
-        header('Location: ' . $adminAuthorizationUrl . '?oauth_token=' . $requestToken['oauth_token']);
-        exit;
-    } else if ($_SESSION['state'] == 1) {
-        $oauthClient->setToken($_GET['oauth_token'], $_SESSION['secret']);
-        $accessToken = $oauthClient->getAccessToken($accessTokenRequestUrl);
-        $_SESSION['state'] = 2;
-        $_SESSION['token'] = $accessToken['oauth_token'];
-        $_SESSION['secret'] = $accessToken['oauth_token_secret'];
-        header('Location: ' . $callbackUrl);
-        exit;
-    } else {
-        $oauthClient->setToken($_SESSION['token'], $_SESSION['secret']);
+        //$requestToken = $oauthClient->getRequestToken($temporaryCredentialsRequestUrl);
+        $oauthClient->setToken($token, $secret);
         //$resourceUrl = "$apiUrl/products/4";
         //create customer
-        $resourceUrl = "$apiUrl/customer/2";
+        $resourceUrl = "$apiUrl/de_DE/customer/14033/shi/list";
+        // $resourceUrl="$apiUrl/de_DE/customer/14032/cart/add/";
+        //$resourceUrl="$apiUrl/de_DE/guest/0/cart/add";
+        //$resourceUrl="$apiUrl/de_DE/checkout/address/setbilling";
+         //$resourceUrl="$apiUrl/de_DE/checkout/address/setshipping";
+        //$resourceUrl="$apiUrl/de_DE/checkout/payment";
+        //$resourceUrl="$apiUrl/de_DE/checkout/order/generate";
+        //$resourceUrl="$apiUrl/de_DE/checkout/order/create";
 
         $productData = json_encode(
             array(
@@ -59,16 +46,43 @@ try {
             "email"=>'test@gmail.com',
             "password"=>'123456'
         ));
+        
+
+        
         $headers = array('Content-Type' => 'application/json','accept'=>'*/*');
         //$oauthClient->fetch($resourceUrl, $customerData, OAUTH_HTTP_METHOD_POST, $headers);
-        $oauthClient->fetch($resourceUrl, array(), 'GET', array('Content-Type' => 'application/xml', 'Accept' => '*/*'));
+        // below for add to cart 
+        /* $product=array();
+        $product['sku']='71538-01';
+        $product['qty']=10;    */
+
+        //below for set billing
+       /* $data=array();
+        $data['customer_billing_address_id']='16421';
+        $data['quote_id']='89206'; */
+
+        ////below for set shipping
+        /*$data['customer_shipping_address_id']='16421';
+        $data['quote_id']='89206';
+        $data['shipping_method']='freeshipping_freeshipping';*/
+
+        // below for set payment method
+        /*$data['quote_id']='89206';
+        $data['payment_method']='payon_invoice';*/
+
+        //below for generate order
+
+        $data['quote_id']='89206';
+
+
+        $oauthClient->fetch($resourceUrl, array(), 'GET', array('Content-Type' => 'application/json', 'Accept' => '*/*'));
         $productsList = json_decode($oauthClient->getLastResponse());
         echo '<pre>';
         print_r($productsList);
-        echo 'heloo';
+        //echo 'heloo';
     }
-} catch (OAuthException $e) {
+ catch (OAuthException $e) {
     //echo '<pre>';
-    //echo $e->getMessage();
+    echo $e->getMessage();
     print_r($e->lastResponse);
 }
